@@ -2,13 +2,14 @@
   "name": "fastify-graphql-nexus",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node-dev --no-notify --respawn --transpile-only src/server",
-    "start": "node dist/server",
+    "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index",
+    "start": "node dist/index",
     "clean": "rm -rf dist",
     "build": "npm -s run clean && npm -s run generate && tsc",
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus",
     "generate:prisma": "prisma generate",
     "generate:nexus": "ts-node --transpile-only src/schema",
+    "db:push": "prisma db push --preview-feature",
     "test": "jest"
   },
   "dependencies": {
@@ -23,9 +24,11 @@
     "nexus": "1.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.22",
     "@types/node": "14.14.37",
     "jest": "^26.6.3",
     "prisma": "2.21.0",
+    "ts-jest": "^26.5.5",
     "ts-node": "9.1.1",
     "ts-node-dev": "1.1.6",
     "typescript": "4.2.3"

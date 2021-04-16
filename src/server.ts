@@ -13,8 +13,7 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-
-function createServer(opts: FastifyServerOptions = {}) {
+export function createServer(opts: FastifyServerOptions = {}) {
   const server = fastify(opts)
 
   server.register(shutdownPlugin)
@@ -35,7 +34,13 @@ function createServer(opts: FastifyServerOptions = {}) {
   return server
 }
 
-const start = async (server: FastifyInstance) => {
+export async function startServer() {
+  const server = createServer({
+    logger: {
+      level: 'info',
+    },
+  })
+
   try {
     const port = process.env.PORT ?? 3000
     await server.listen(port, '0.0.0.0')
@@ -44,11 +49,3 @@ const start = async (server: FastifyInstance) => {
     process.exit(1)
   }
 }
-
-const server = createServer({
-  logger: {
-    level: 'info',
-  },
-})
-
-start(server)
