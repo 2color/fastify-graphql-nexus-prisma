@@ -6,6 +6,8 @@ import fastify, {
 } from 'fastify'
 import mercurius from 'mercurius'
 import { schema } from './schema'
+import AltairFastify from 'altair-fastify-plugin'
+
 import { context } from './context'
 import shutdownPlugin from './plugins/shutdown'
 import sentryPlugin from './plugins/sentry'
@@ -20,10 +22,23 @@ export function createServer(opts: FastifyServerOptions = {}) {
   server.register(sentryPlugin)
   server.register(mercurius, {
     schema,
+    path: '/graphql',
+    graphiql: false,
     context: (request: FastifyRequest, reply: FastifyReply) => {
       return context
     },
-    graphiql: true,
+  })
+  server.register(AltairFastify, {
+    path: '/altair',
+    baseURL: '/altair/',
+    // 'endpointURL' should be the same as the mercurius 'path'
+    endpointURL: '/graphql',
+    initialSettings: {
+      theme: 'dark',
+      plugin: {
+        list: ['altair-graphql-plugin-graphql-explorer'],
+      },
+    },
   })
 
   server.get(`/`, async function (req, res) {
