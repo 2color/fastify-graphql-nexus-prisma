@@ -7,7 +7,6 @@ import fastify, {
 import mercurius from 'mercurius'
 import { schema } from './schema'
 import AltairFastify from 'altair-fastify-plugin'
-
 import { context } from './context'
 import shutdownPlugin from './plugins/shutdown'
 import sentryPlugin from './plugins/sentry'
@@ -41,8 +40,8 @@ export function createServer(opts: FastifyServerOptions = {}) {
     },
   })
 
+  // Status/health endpoint
   server.get(`/`, async function (req, res) {
-    // Status endpoint
     return { up: true }
   })
 
