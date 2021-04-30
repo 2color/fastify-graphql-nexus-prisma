@@ -10,6 +10,9 @@
     "generate:prisma": "prisma generate",
     "generate:nexus": "ts-node --transpile-only src/schema",
     "db:push": "prisma db push --preview-feature",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:reset": "prisma migrate reset",
     "test": "jest"
   },
   "dependencies": {
