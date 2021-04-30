@@ -14,6 +14,11 @@ The project is written in TypeScript and attempts to maintain a high degree of t
 
 Play with a deployed version of this API: https://fastify-prisma.up.railway.app/altair
 
+## Deploy it! 🚢
+
+[![Deploy on Railway 🚊](https://railway.app/button.svg)](https://railway.app/new?template=https%3A%2F%2Fgithub.com%2F2color%2Ffastify-graphql-nexus-prisma&plugins=postgresql&envs=SENTRY_DSN&optionalEnvs=SENTRY_DSN)
+
+
 ## DB Schema
 
 The database schema is defined using the [Prisma schema](./prisma/schema.prisma) which defines 3 models:
