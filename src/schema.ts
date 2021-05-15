@@ -11,6 +11,7 @@ import {
 } from 'nexus'
 import { DateTimeResolver } from 'graphql-scalars'
 import { Context } from './context'
+import { nexusPrisma } from 'nexus-plugin-prisma'
 
 export const DateTime = asNexusMethod(DateTimeResolver, 'date')
 
@@ -226,90 +227,36 @@ const Mutation = objectType({
 const User = objectType({
   name: 'User',
   definition(t) {
-    t.nonNull.int('id')
-    t.string('name')
-    t.nonNull.string('email')
-    t.nonNull.list.nonNull.field('posts', {
-      type: 'Post',
-      resolve: (parent, _, context: Context) => {
-        return context.prisma.user
-          .findUnique({
-            where: { id: parent.id || undefined },
-          })
-          .posts()
-      },
-    })
+    t.model.id()
+    t.model.name()
+    t.model.email()
+    t.model.posts()
   },
 })
 
 const Post = objectType({
   name: 'Post',
   definition(t) {
-    t.nonNull.int('id')
-    t.nonNull.field('createdAt', { type: 'DateTime' })
-    t.nonNull.field('updatedAt', { type: 'DateTime' })
-    t.nonNull.string('title')
-    t.string('content')
-    t.nonNull.boolean('published')
-    t.field('author', {
-      type: 'User',
-      resolve: (parent, _, context: Context) => {
-        return context.prisma.post
-          .findUnique({
-            where: { id: parent.id || undefined },
-          })
-          .author()
-      },
-    })
-    t.list.nonNull.field('likedBy', {
-      type: 'User',
-      resolve: (parent, _, context: Context) => {
-        return context.prisma.post
-          .findUnique({
-            where: { id: parent.id || undefined },
-          })
-          .likedBy()
-      },
-    })
-    t.list.nonNull.field('comments', {
-      type: 'Comment',
-      resolve: (parent, _, context: Context) => {
-        return context.prisma.post
-          .findUnique({
-            where: { id: parent.id || undefined },
-          })
-          .comments()
-      },
-    })
+    t.model.id()
+    t.model.createdAt()
+    t.model.updatedAt()
+    t.model.title()
+    t.model.content()
+    t.model.published()
+    t.model.author()
+    t.model.likedBy()
+    t.model.comments()
   },
 })
 
 const Comment = objectType({
   name: 'Comment',
   definition(t) {
-    t.nonNull.int('id')
-    t.nonNull.field('createdAt', { type: 'DateTime' })
-    t.nonNull.string('comment')
-    t.field('post', {
-      type: 'Post',
-      resolve: (parent, _, context: Context) => {
-        return context.prisma.comment
-          .findUnique({
-            where: { id: parent.id || undefined },
-          })
-          .post()
-      },
-    })
-    t.field('author', {
-      type: 'User',
-      resolve: (parent, _, context: Context) => {
-        return context.prisma.comment
-          .findUnique({
-            where: { id: parent.id || undefined },
-          })
-          .author()
-      },
-    })
+    t.model.id()
+    t.model.createdAt()
+    t.model.comment()
+    t.model.post()
+    t.model.author()
   },
 })
 
@@ -388,4 +335,5 @@ export const schema = makeSchema({
       },
     ],
   },
+  plugins: [nexusPrisma()],
 })
