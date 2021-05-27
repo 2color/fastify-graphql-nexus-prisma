@@ -7,9 +7,10 @@ import fastify, {
 import mercurius from 'mercurius'
 import { schema } from './schema'
 import AltairFastify from 'altair-fastify-plugin'
-import { context } from './context'
+import { Context } from './context'
+import prismaPlugin from './plugins/prisma'
 import shutdownPlugin from './plugins/shutdown'
-import sentryPlugin from './plugins/sentry'
+import appSignalPlugin from './plugins/appsignal'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -17,16 +18,20 @@ dotenv.config()
 export function createServer(opts: FastifyServerOptions = {}) {
   const server = fastify(opts)
 
+  server.register(prismaPlugin)
   server.register(shutdownPlugin)
-  server.register(sentryPlugin)
   server.register(mercurius, {
     schema,
     path: '/graphql',
     graphiql: false,
-    context: (request: FastifyRequest, reply: FastifyReply) => {
-      return context
+    context: (request: FastifyRequest, reply: FastifyReply): Context => {
+      return {
+        prisma: server.prisma
+      }
     },
   })
+  server.register(appSignalPlugin)
+
   server.register(AltairFastify, {
     path: '/altair',
     baseURL: '/altair/',
