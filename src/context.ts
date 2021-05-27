@@ -4,6 +4,16 @@ export interface Context {
   prisma: PrismaClient
 }
 
+
+const prisma = new PrismaClient({
+  log: ['error', 'info', 'warn'],
+})
+
+
+export const context: Context = {
+  prisma: prisma,
+}
+
 // Middleware function to track db query performance
 // prisma.$use(async (params, next) => {
 //   const transaction = Sentry.startTransaction({

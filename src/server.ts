@@ -1,70 +1,25 @@
-import fastify, {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-  FastifyServerOptions,
-} from 'fastify'
-import mercurius from 'mercurius'
+import { ApolloServer } from 'apollo-server'
 import { schema } from './schema'
-import AltairFastify from 'altair-fastify-plugin'
-import { Context } from './context'
-import prismaPlugin from './plugins/prisma'
-import shutdownPlugin from './plugins/shutdown'
-import appSignalPlugin from './plugins/appsignal'
+import { context } from './context'
 import dotenv from 'dotenv'
+import { createApolloPlugin } from '@appsignal/apollo-server'
+import { Appsignal } from '@appsignal/nodejs'
 
 dotenv.config()
 
-export function createServer(opts: FastifyServerOptions = {}) {
-  const server = fastify(opts)
+const appsignal = new Appsignal({
+  active: true,
+  debug: true,
+})
 
-  server.register(prismaPlugin)
-  server.register(shutdownPlugin)
-  server.register(mercurius, {
-    schema,
-    path: '/graphql',
-    graphiql: false,
-    context: (request: FastifyRequest, reply: FastifyReply): Context => {
-      return {
-        prisma: server.prisma
-      }
-    },
-  })
-  server.register(appSignalPlugin)
 
-  server.register(AltairFastify, {
-    path: '/altair',
-    baseURL: '/altair/',
-    // 'endpointURL' should be the same as the mercurius 'path'
-    endpointURL: '/graphql',
-    initialSettings: {
-      theme: 'dark',
-      plugin: {
-        list: ['altair-graphql-plugin-graphql-explorer'],
-      },
-    },
-  })
-
-  // Status/health endpoint
-  server.get(`/`, async function (req, res) {
-    return { up: true }
-  })
-
-  return server
-}
+const server = new ApolloServer({
+  schema: schema,
+  context: context,
+  plugins: [createApolloPlugin(appsignal)],
+})
 
 export async function startServer() {
-  const server = createServer({
-    logger: {
-      level: 'info',
-    },
-  })
-
-  try {
-    const port = process.env.PORT ?? 3000
-    await server.listen(port, '0.0.0.0')
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
-  }
+  const { url } = await server.listen()
+  console.log(`🚀 Server ready at: ${url}`)
 }
