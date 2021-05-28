@@ -1,3 +1,4 @@
+import appSignalPlugin from './plugins/appsignal'
 import fastify, {
   FastifyInstance,
   FastifyReply,
@@ -10,7 +11,6 @@ import AltairFastify from 'altair-fastify-plugin'
 import { Context } from './context'
 import prismaPlugin from './plugins/prisma'
 import shutdownPlugin from './plugins/shutdown'
-import appSignalPlugin from './plugins/appsignal'
 import dotenv from 'dotenv'
 
 dotenv.config()

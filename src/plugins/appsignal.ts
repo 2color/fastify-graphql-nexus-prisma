@@ -1,7 +1,8 @@
+import { Appsignal } from '@appsignal/nodejs'
 import fp from 'fastify-plugin'
 import { FastifyPluginAsync } from 'fastify'
 import { NodeClient, NodeSpan } from '@appsignal/types'
-import { Appsignal } from '@appsignal/nodejs'
+
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -11,13 +12,14 @@ declare module 'fastify' {
     span: NodeSpan
   }
 }
-
+const appsignal = new Appsignal({
+  active: true,
+  name: 'fastly',
+  apiKey: process.env.APPSIGNAL_PUSH_API_KEY,
+  debug: true,
+  logPath: "logs"
+})
 const appSignalPlugin: FastifyPluginAsync = fp(async (server, options) => {
-  const appsignal = new Appsignal({
-    active: true,
-    debug: true,
-  })
-
   appsignal.start()
 
   server.decorate('appsignal', appsignal)
