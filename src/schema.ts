@@ -40,7 +40,7 @@ const Query = objectType({
     t.nullable.field('postById', {
       type: 'Post',
       args: {
-        id: intArg(),
+        id: nonNull(intArg()),
       },
       resolve: (_parent, args, context: Context) => {
         return context.prisma.post.findUnique({
@@ -185,6 +185,25 @@ const Mutation = objectType({
       },
     })
 
+    t.field('likePost', {
+      type: 'Post',
+      args: {
+        id: nonNull(intArg()),
+      },
+      resolve: (_, args, context: Context) => {
+        return context.prisma.post.update({
+          data: {
+            likes: {
+              increment: 1
+            }
+          },
+          where: {
+            id: args.id
+          }
+        })
+      },
+    })
+
     t.field('togglePublishPost', {
       type: 'Post',
       args: {
@@ -244,7 +263,7 @@ const Post = objectType({
     t.model.content()
     t.model.published()
     t.model.author()
-    t.model.likedBy()
+    t.model.likes()
     t.model.comments()
   },
 })

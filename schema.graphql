@@ -27,6 +27,7 @@ type Mutation {
   createComment(authorEmail: String!, data: CommentCreateInput!, postId: Int!): Comment
   createDraft(authorEmail: String!, data: PostCreateInput!): Post
   deletePost(id: Int!): Post
+  likePost(id: Int!): Post
   signupUser(data: UserCreateInput!): User!
   togglePublishPost(id: Int!): Post
 }
@@ -37,7 +38,7 @@ type Post {
   content: String
   createdAt: DateTime!
   id: Int!
-  likedBy(after: UserWhereUniqueInput, before: UserWhereUniqueInput, first: Int, last: Int): [User!]!
+  likes: Int!
   published: Boolean!
   title: String!
   updatedAt: DateTime!
@@ -60,7 +61,7 @@ type Query {
   allUsers: [User!]!
   draftsByUser(userUniqueInput: UserUniqueInput!): [Post]
   feed(orderBy: PostOrderByUpdatedAtInput, searchString: String, skip: Int, take: Int): [Post!]!
-  postById(id: Int): Post
+  postById(id: Int!): Post
   status: Status
 }
 
@@ -87,11 +88,6 @@ input UserCreateInput {
 }
 
 input UserUniqueInput {
-  email: String
-  id: Int
-}
-
-input UserWhereUniqueInput {
   email: String
   id: Int
 }
