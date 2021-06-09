@@ -8,11 +8,10 @@ datasource db {
 }
 
 model User {
-  email    String    @unique
   id       Int       @id @default(autoincrement())
+  email    String    @unique
   name     String?
   posts    Post[]
-  likes    Post[]    @relation("UserPostLikes")
   comments Comment[]
 }
 
@@ -22,11 +21,11 @@ model Post {
   updatedAt DateTime  @updatedAt
   title     String
   content   String?
+  likes     Int       @default(0)
   published Boolean   @default(false)
   author    User?     @relation(fields: [authorId], references: [id])
   authorId  Int?
   comments  Comment[]
-  likedBy   User[]    @relation("UserPostLikes")
 }
 
 model Comment {
