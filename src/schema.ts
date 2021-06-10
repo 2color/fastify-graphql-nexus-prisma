@@ -10,7 +10,6 @@ import {
   enumType,
 } from 'nexus'
 import { DateTimeResolver } from 'graphql-scalars'
-import { Context } from './context'
 import { nexusPrisma } from 'nexus-plugin-prisma'
 
 export const DateTime = asNexusMethod(DateTimeResolver, 'date')
@@ -20,8 +19,13 @@ const Query = objectType({
   definition(t) {
     t.nonNull.list.nonNull.field('allUsers', {
       type: 'User',
-      resolve: (_parent, _args, context: Context) => {
-        return context.prisma.user.findMany()
+      resolve: async (_parent, _args, context, info) => {
+        const { tracer } = context.request.openTelemetry()
+        // Spans started in a wrapped route will automatically be children of the activeSpan.
+        const childSpan = tracer.startSpan(`allUsers prisma.user.findMany`)
+        const users = await context.prisma.user.findMany()
+        childSpan.end()
+        return users
       },
     })
 
@@ -32,7 +36,7 @@ const Query = objectType({
           t.boolean('up')
         },
       }),
-      resolve: (_parent, _args, context: Context) => {
+      resolve: (_parent, _args, context) => {
         return { up: true }
       },
     })
@@ -42,7 +46,7 @@ const Query = objectType({
       args: {
         id: nonNull(intArg()),
       },
-      resolve: (_parent, args, context: Context) => {
+      resolve: (_parent, args, context) => {
         return context.prisma.post.findUnique({
           where: { id: args.id || undefined },
         })
@@ -59,7 +63,7 @@ const Query = objectType({
           type: 'PostOrderByUpdatedAtInput',
         }),
       },
-      resolve: (_parent, args, context: Context) => {
+      resolve: (_parent, args, context) => {
         const or = args.searchString
           ? {
               OR: [
@@ -90,7 +94,7 @@ const Query = objectType({
           }),
         ),
       },
-      resolve: (_parent, args, context: Context) => {
+      resolve: (_parent, args, context) => {
         return context.prisma.user
           .findUnique({
             where: {
@@ -120,7 +124,7 @@ const Mutation = objectType({
           }),
         ),
       },
-      resolve: (_, args, context: Context) => {
+      resolve: (_, args, context) => {
         const postData = args.data.posts?.map((post) => {
           return { title: post.title, content: post.content || undefined }
         })
@@ -146,7 +150,7 @@ const Mutation = objectType({
         ),
         authorEmail: nonNull(stringArg()),
       },
-      resolve: (_, args, context: Context) => {
+      resolve: (_, args, context) => {
         return context.prisma.post.create({
           data: {
             title: args.data.title,
@@ -170,7 +174,7 @@ const Mutation = objectType({
         authorEmail: nonNull(stringArg()),
         postId: nonNull(intArg()),
       },
-      resolve: (_, args, context: Context) => {
+      resolve: (_, args, context) => {
         return context.prisma.comment.create({
           data: {
             comment: args.data.comment,
@@ -190,16 +194,16 @@ const Mutation = objectType({
       args: {
         id: nonNull(intArg()),
       },
-      resolve: (_, args, context: Context) => {
+      resolve: (_, args, context) => {
         return context.prisma.post.update({
           data: {
             likes: {
-              increment: 1
-            }
+              increment: 1,
+            },
           },
           where: {
-            id: args.id
-          }
+            id: args.id,
+          },
         })
       },
     })
@@ -209,7 +213,7 @@ const Mutation = objectType({
       args: {
         id: nonNull(intArg()),
       },
-      resolve: async (_, args, context: Context) => {
+      resolve: async (_, args, context) => {
         try {
           const post = await context.prisma.post.findUnique({
             where: { id: args.id || undefined },
@@ -234,7 +238,7 @@ const Mutation = objectType({
       args: {
         id: nonNull(intArg()),
       },
-      resolve: (_, args, context: Context) => {
+      resolve: (_, args, context) => {
         return context.prisma.post.delete({
           where: { id: args.id },
         })

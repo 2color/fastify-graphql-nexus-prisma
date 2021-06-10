@@ -4,27 +4,39 @@ import fastify, {
   FastifyRequest,
   FastifyServerOptions,
 } from 'fastify'
+import { tracingIgnoreRoutes } from './constants'
 import mercurius from 'mercurius'
 import { schema } from './schema'
 import AltairFastify from 'altair-fastify-plugin'
-import { context } from './context'
 import shutdownPlugin from './plugins/shutdown'
-import sentryPlugin from './plugins/sentry'
-import dotenv from 'dotenv'
+import openTelemetryPlugin from '@autotelic/fastify-opentelemetry'
+import prismaPlugin from './plugins/prisma'
+import { Context } from './context'
+import statusPlugin from './plugins/status'
 
-dotenv.config()
-
+require('./opentelemetry')
 export function createServer(opts: FastifyServerOptions = {}) {
   const server = fastify(opts)
 
   server.register(shutdownPlugin)
-  server.register(sentryPlugin)
+  server.register(openTelemetryPlugin, {
+    serviceName: process.env.SERVICE_NAME,
+    wrapRoutes: true,
+    ignoreRoutes: tracingIgnoreRoutes,
+  })
+  server.register(statusPlugin)
+  server.register(prismaPlugin)
+
   server.register(mercurius, {
     schema,
     path: '/graphql',
     graphiql: false,
-    context: (request: FastifyRequest, reply: FastifyReply) => {
-      return context
+    context: (request: FastifyRequest, reply: FastifyReply): Context => {
+      return {
+        prisma: server.prisma,
+        request,
+        reply,
+      }
     },
   })
   server.register(AltairFastify, {
@@ -40,11 +52,6 @@ export function createServer(opts: FastifyServerOptions = {}) {
     },
   })
 
-  // Status/health endpoint
-  server.get(`/`, async function (req, res) {
-    return { up: true }
-  })
-
   return server
 }
 
@@ -53,6 +60,7 @@ export async function startServer() {
     logger: {
       level: 'info',
     },
+    disableRequestLogging: process.env.ENABLE_REQUEST_LOGGING !== 'true'
   })
 
   try {
