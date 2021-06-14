@@ -1,8 +1,9 @@
-import opentelemetry from '@opentelemetry/api'
 import { HttpTraceContextPropagator } from '@opentelemetry/core'
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks'
 import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
+import { Resource } from '@opentelemetry/resources';
+
 
 import { NodeTracerProvider } from '@opentelemetry/node'
 
@@ -12,12 +13,21 @@ import {
   SpanExporter,
 } from '@opentelemetry/tracing'
 
-const provider = new NodeTracerProvider()
+const provider = new NodeTracerProvider({
+  resource: new Resource({
+    'service.name': process.env.SERVICE_NAME || 'fastify-graphql-nexus-prisma',
+    'service.commit': process.env.RAILWAY_GIT_COMMIT_SHA as string || 'dev'
+  }),
+})
+
 const graphQLInstrumentation = new GraphQLInstrumentation()
 graphQLInstrumentation.setTracerProvider(provider)
 graphQLInstrumentation.enable()
 
 if (process.env.LIGHTSTEP_EXPORTER === 'true') {
+  console.log(
+    `Lightstep exporter enabled`,
+  )
   provider.addSpanProcessor(
     new SimpleSpanProcessor(
       new CollectorTraceExporter({
@@ -29,9 +39,10 @@ if (process.env.LIGHTSTEP_EXPORTER === 'true') {
     ),
   )
 }
+
 if (process.env.JAEGER_EXPORTER === 'true') {
   console.log(
-    `Jaeger exporter enabled | serviceName: ${process.env.SERVICE_NAME}`,
+    `Jaeger exporter enabled`,
   )
   const { JaegerExporter } = require('@opentelemetry/exporter-jaeger')
   const exporter = provider.addSpanProcessor(
@@ -44,7 +55,8 @@ if (process.env.JAEGER_EXPORTER === 'true') {
   )
 }
 
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
+// Emits traces to the console for debugging
+// provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 
 provider.register({
   contextManager: new AsyncHooksContextManager().enable(),

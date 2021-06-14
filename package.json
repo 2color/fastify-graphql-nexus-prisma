@@ -25,6 +25,7 @@
     "@opentelemetry/exporter-jaeger": "^0.20.0",
     "@opentelemetry/instrumentation-graphql": "^0.20.0",
     "@opentelemetry/node": "^0.20.0",
+    "@opentelemetry/resources": "^0.20.0",
     "@opentelemetry/tracing": "^0.20.0",
     "@prisma/client": "2.23.0",
     "@sentry/node": "^6.2.5",
@@ -36,7 +37,8 @@
     "graphql": "15.5.0",
     "graphql-scalars": "^1.9.0",
     "mercurius": "7.4.0",
-    "nexus": "1.0.0"
+    "nexus": "1.0.0",
+    "nexus-prisma": "^0.28.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.22",

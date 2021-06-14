@@ -1,3 +1,4 @@
+require('./opentelemetry')
 import fastify, {
   FastifyInstance,
   FastifyReply,
@@ -14,15 +15,15 @@ import prismaPlugin from './plugins/prisma'
 import { Context } from './context'
 import statusPlugin from './plugins/status'
 
-require('./opentelemetry')
-export function createServer(opts: FastifyServerOptions = {}) {
+export function createServer(opts: FastifyServerOptions = {}): FastifyInstance {
   const server = fastify(opts)
 
   server.register(shutdownPlugin)
   server.register(openTelemetryPlugin, {
-    serviceName: process.env.SERVICE_NAME,
     wrapRoutes: true,
     ignoreRoutes: tracingIgnoreRoutes,
+    formatSpanName: (serviceName, request) =>
+      `${request.url} - ${request.method}`,
   })
   server.register(statusPlugin)
   server.register(prismaPlugin)
@@ -60,7 +61,7 @@ export async function startServer() {
     logger: {
       level: 'info',
     },
-    disableRequestLogging: process.env.ENABLE_REQUEST_LOGGING !== 'true'
+    disableRequestLogging: process.env.ENABLE_REQUEST_LOGGING !== 'true',
   })
 
   try {
