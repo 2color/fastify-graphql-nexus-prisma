@@ -35,10 +35,8 @@
     "fastify-plugin": "^3.0.0",
     "graphql": "15.5.0",
     "graphql-scalars": "^1.9.0",
-    "lightstep-opentelemetry-launcher-node": "^0.16.0",
     "mercurius": "7.4.0",
-    "nexus": "1.0.0",
-    "nexus-plugin-prisma": "0.35.0"
+    "nexus": "1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.22",

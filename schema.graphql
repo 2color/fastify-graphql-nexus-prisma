@@ -3,19 +3,15 @@
 
 
 type Comment {
-  author: User!
+  author: User
   comment: String!
   createdAt: DateTime!
   id: Int!
-  post: Post!
+  post: Post
 }
 
 input CommentCreateInput {
   comment: String!
-}
-
-input CommentWhereUniqueInput {
-  id: Int
 }
 
 """
@@ -34,7 +30,7 @@ type Mutation {
 
 type Post {
   author: User
-  comments(after: CommentWhereUniqueInput, before: CommentWhereUniqueInput, first: Int, last: Int): [Comment!]!
+  comments: [Comment!]
   content: String
   createdAt: DateTime!
   id: Int!
@@ -51,10 +47,6 @@ input PostCreateInput {
 
 input PostOrderByUpdatedAtInput {
   updatedAt: SortOrder!
-}
-
-input PostWhereUniqueInput {
-  id: Int
 }
 
 type Query {
@@ -78,7 +70,7 @@ type User {
   email: String!
   id: Int!
   name: String
-  posts(after: PostWhereUniqueInput, before: PostWhereUniqueInput, first: Int, last: Int): [Post!]!
+  posts: [Post!]!
 }
 
 input UserCreateInput {
