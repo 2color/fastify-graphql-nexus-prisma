@@ -16,7 +16,7 @@ import {
 const provider = new NodeTracerProvider({
   resource: new Resource({
     'service.name': process.env.SERVICE_NAME || 'fastify-graphql-nexus-prisma',
-    'service.commit': process.env.RAILWAY_GIT_COMMIT_SHA as string || 'dev'
+    'service.version': process.env.RAILWAY_GIT_COMMIT_SHA as string || 'dev'
   }),
 })
 
