@@ -2,8 +2,7 @@ import { HttpTraceContextPropagator } from '@opentelemetry/core'
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks'
 import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
-import { Resource } from '@opentelemetry/resources';
-
+import { Resource } from '@opentelemetry/resources'
 
 import { NodeTracerProvider } from '@opentelemetry/node'
 
@@ -16,7 +15,7 @@ import {
 const provider = new NodeTracerProvider({
   resource: new Resource({
     'service.name': process.env.SERVICE_NAME || 'fastify-graphql-nexus-prisma',
-    'service.version': process.env.RAILWAY_GIT_COMMIT_SHA as string || 'dev'
+    'service.version': (process.env.RAILWAY_GIT_COMMIT_SHA as string) || 'dev',
   }),
 })
 
@@ -25,9 +24,7 @@ graphQLInstrumentation.setTracerProvider(provider)
 graphQLInstrumentation.enable()
 
 if (process.env.LIGHTSTEP_EXPORTER === 'true') {
-  console.log(
-    `Lightstep exporter enabled`,
-  )
+  console.log(`Lightstep exporter enabled`)
   provider.addSpanProcessor(
     new SimpleSpanProcessor(
       new CollectorTraceExporter({
@@ -41,9 +38,7 @@ if (process.env.LIGHTSTEP_EXPORTER === 'true') {
 }
 
 if (process.env.JAEGER_EXPORTER === 'true') {
-  console.log(
-    `Jaeger exporter enabled`,
-  )
+  console.log(`Jaeger exporter enabled`)
   const { JaegerExporter } = require('@opentelemetry/exporter-jaeger')
   const exporter = provider.addSpanProcessor(
     new SimpleSpanProcessor(
@@ -55,9 +50,10 @@ if (process.env.JAEGER_EXPORTER === 'true') {
   )
 }
 
-// Emits traces to the console for debugging
-// provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
-
+if (process.env.CONSOLE_EXPORTER === 'true') {
+  // Emits traces to the console for debugging
+  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
+}
 provider.register({
   contextManager: new AsyncHooksContextManager().enable(),
   propagator: new HttpTraceContextPropagator(),
