@@ -67,6 +67,7 @@ const Query = objectType({
     t.nonNull.list.nonNull.field('feed', {
       type: 'Post',
       args: {
+        published: booleanArg(),
         searchString: stringArg(),
         skip: intArg(),
         take: intArg(),
@@ -90,7 +91,7 @@ const Query = objectType({
         })
         const feed = context.prisma.post.findMany({
           where: {
-            published: true,
+            published: args.published || true,
             ...or,
           },
           take: args.take || undefined,
