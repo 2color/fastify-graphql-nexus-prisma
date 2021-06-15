@@ -52,6 +52,7 @@ if (process.env.JAEGER_EXPORTER === 'true') {
 
 if (process.env.CONSOLE_EXPORTER === 'true') {
   // Emits traces to the console for debugging
+  console.log(`Console span exporter enabled`)
   provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 }
 provider.register({
