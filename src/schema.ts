@@ -91,7 +91,7 @@ const Query = objectType({
         })
         const feed = context.prisma.post.findMany({
           where: {
-            published: args.published || true,
+            published: args.published ?? true,
             ...or,
           },
           take: args.take || undefined,
