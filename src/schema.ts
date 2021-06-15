@@ -12,6 +12,7 @@ import {
 } from 'nexus'
 import { DateTimeResolver } from 'graphql-scalars'
 import { User, Post, Comment } from 'nexus-prisma'
+import { Prisma } from '@prisma/client'
 
 export const DateTime = asNexusMethod(DateTimeResolver, 'date')
 
@@ -156,17 +157,24 @@ const Mutation = objectType({
           'prisma.model': 'user',
           'prisma.action': 'create',
         })
-        const user = await context.prisma.user.create({
-          data: {
-            name: args.data.name,
-            email: args.data.email,
-            posts: {
-              create: postData,
+        try {
+          const user = await context.prisma.user.create({
+            data: {
+              name: args.data.name,
+              email: args.data.email,
+              posts: {
+                create: postData,
+              },
             },
-          },
-        })
-        childSpan.end()
-        return user
+          })
+          return user
+        } catch (e) {
+          childSpan.setAttribute('error', true)
+          childSpan.setAttribute('prisma.error', e.toString())
+          throw e
+        } finally {
+          childSpan.end()
+        }
       },
     })
 
