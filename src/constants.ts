@@ -5,6 +5,7 @@ export const tracingIgnoreRoutes = [
   '/altair/runtime-es2018.js',
   '/altair/polyfills-es2018.js',
   '/altair/main-es2018.js',
+  '/favicon.ico',
   '/altair/favicon.ico',
   '/altair/assets/i18n/default.json',
   '/altair/assets/i18n/en-US.json',
