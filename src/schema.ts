@@ -316,22 +316,8 @@ const UserType = objectType({
     t.field(User.id.name, User.id)
     t.field(User.name.name, User.name)
     t.field(User.email.name, User.email)
-
     // Relation fields can use the generated resolver from nexus-prisma or a custom one
     t.field(User.posts.name, User.posts)
-    // t.field(User.posts.name, {
-    //   ...User.posts,
-    //   async resolve(_parent, args, context, info) {
-    //     const { tracer } = context.request.openTelemetry()
-    //     const childSpan = tracer.startSpan(`prisma`).setAttributes({
-    //       'prisma.model': 'post',
-    //       'prisma.action': 'delete',
-    //     })
-    //     const result = await User.posts.resolve(_parent, args, context, info)
-    //     childSpan.end()
-    //     return result
-    //   },
-    // })
   },
 })
 
