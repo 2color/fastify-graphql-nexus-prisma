@@ -16,6 +16,11 @@ const prismaPlugin: FastifyPluginAsync = fp(async (server, options) => {
 
   server.decorate('prisma', prisma)
 
+  server.addHook('onClose', async (server) => {
+    server.log.info('disconnecting Prisma from DB')
+    await server.prisma.$disconnect()
+  })
+
   // // Middleware function to track db query performance
   // prisma.$use(async (params, next) => {
   //   const result = await next(params)
