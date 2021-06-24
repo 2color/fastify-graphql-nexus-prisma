@@ -313,39 +313,39 @@ const Mutation = objectType({
 const UserType = objectType({
   name: User.$name,
   definition(t) {
-    t.field(User.id.name, User.id)
-    t.field(User.name.name, User.name)
-    t.field(User.email.name, User.email)
+    t.field(User.id)
+    t.field(User.name)
+    t.field(User.email)
     // Relation fields can use the generated resolver from nexus-prisma or a custom one
-    t.field(User.posts.name, User.posts)
+    t.field(User.posts)
   },
 })
 
 const PostType = objectType({
   name: 'Post',
   definition(t) {
-    t.field(Post.id.name, Post.id)
-    t.field(Post.createdAt.name, Post.createdAt)
-    t.field(Post.updatedAt.name, Post.updatedAt)
-    t.field(Post.title.name, Post.title)
-    t.field(Post.content.name, Post.content)
-    t.field(Post.published.name, Post.published)
-    t.field(Post.likes.name, Post.likes)
+    t.field(Post.id)
+    t.field(Post.createdAt)
+    t.field(Post.updatedAt)
+    t.field(Post.title)
+    t.field(Post.content)
+    t.field(Post.published)
+    t.field(Post.likes)
     // Relation fields and generated resolvers from nexus-prisma
-    t.field(Post.author.name, Post.author)
-    t.field(Post.comments.name, Post.comments)
+    t.field(Post.author)
+    t.field(Post.comments)
   },
 })
 
 const CommentType = objectType({
   name: 'Comment',
   definition(t) {
-    t.field(Comment.id.name, Comment.id)
-    t.field(Comment.createdAt.name, Comment.createdAt)
-    t.field(Comment.comment.name, Comment.comment)
+    t.field(Comment.id)
+    t.field(Comment.createdAt)
+    t.field(Comment.comment)
     // Relation fields and generated resolvers from nexus-prisma
-    t.field(Comment.post.name, Comment.post)
-    t.field(Comment.author.name, Comment.author)
+    t.field(Comment.post)
+    t.field(Comment.author)
   },
 })
 
