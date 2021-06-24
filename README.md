@@ -5,9 +5,11 @@ This repo shows how to build a GraphQL server with TypeScript and the following 
 - [**Fastify**](https://www.fastify.io/): Fast and low overhead web framework, for Node.js
 - [**Mercurius**](https://mercurius.dev/): GraphQL adapter for Fastify
 - [**Nexus**](https://nexusjs.org/): Declarative, Code-First GraphQL Schemas for JavaScript/TypeScript
+- [**nexus-prisma**](https://github.com/prisma/nexus-prisma/): Plugin that allows projecting types from your Prisma schema to the GraphQL schema
 - [**Prisma**](https://www.prisma.io/): Next-generation ORM for type-safe interaction with the database
 - [**PostgreSQL**](https://www.postgresql.org/): powerful, open source object-relational database system with over 30 years of active development.
-- [**Sentry**](https://sentry.io/): an error tracking and monitoring tool.
+<!-- - [**Sentry**](https://sentry.io/): an error tracking and monitoring tool. -->
+- [**OpenTelemetry Tracing**](https://opentelemetry.io/): An observability framework for cloud-native software. Configured to trace HTTP requests, GraphQL resolution and Prisma queries.
 - [**Altair GraphQL**](https://altair.sirmuel.design/): GraphQL Web Client (similar to GraphQL Playground)
 
 The project is written in TypeScript and attempts to maintain a high degree of type-safety by leveraging Prisma and GraphQL.
@@ -47,3 +49,26 @@ The relevant files are:
 3. `npm install`
 4. `npm run migrate:dev` to run shcema migrations with [Prisma Migrate](https://www.prisma.io/migrate)
 5. `npm run dev` to start dev server and run the API
+
+## Tracing
+
+The GraphQL server is instrumented with OpenTelemetry tracing.
+
+Here's how it works:
+- `@autorelic/fastify-opentelemetry` is a plugin that creates a root span for every fastify HTTP request and allows creating child spans using `request.openTelemetry()`
+-  `@opentelemetry/instrumentation-graphql` provides auto-instrumentation for GraphQL execution
+- Additional spans for Prisma Client queries are created in the GraphQL resolvers through `context.request.openTelemetry()`.
+
+
+### Example trace
+
+![trace example](https://user-images.githubusercontent.com/1992255/123289101-6c69d400-d510-11eb-9154-8aa0bdb8d10c.png)
+
+
+### Viewing traces in local development with Jaeger
+
+You can view traces in local development using [Jaeger](https://www.jaegertracing.io/).
+
+1. Start jaeger by going into the [tracing](./tracing) folder and running `docker compose up -d`
+2. In your `.env` file set `JAEGER_EXPORTER="true"`
+3. Open the Jaeger UI: `http://localhost:16686/`
