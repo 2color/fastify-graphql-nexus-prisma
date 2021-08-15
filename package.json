@@ -36,7 +36,7 @@
     "graphql-scalars": "1.9.0",
     "mercurius": "7.4.0",
     "nexus": "1.1.0",
-    "nexus-prisma": "0.29.1"
+    "nexus-prisma": "0.30.0"
   },
   "devDependencies": {
     "@types/jest": "26.0.22",

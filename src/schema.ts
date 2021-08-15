@@ -21,32 +21,19 @@ const Query = objectType({
     t.nonNull.list.nonNull.field('allUsers', {
       type: 'User',
       resolve: async (_parent, _args, context, info) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'user',
-          'prisma.action': 'findMany',
-        })
         const users = await context.prisma.user.findMany()
-        childSpan.end()
         return users
       },
     })
-
     t.nullable.field('postById', {
       type: 'Post',
       args: {
         id: nonNull(intArg()),
       },
       resolve: async (_parent, args, context, info) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'findUnique',
-        })
         const posts = await context.prisma.post.findUnique({
           where: { id: args.id || undefined },
         })
-        childSpan.end()
         return posts
       },
     })
@@ -71,11 +58,6 @@ const Query = objectType({
               ],
             }
           : {}
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'findMany',
-        })
         const feed = context.prisma.post.findMany({
           where: {
             published: args.published ?? true,
@@ -85,7 +67,6 @@ const Query = objectType({
           skip: args.skip || undefined,
           orderBy: args.orderBy || undefined,
         })
-        childSpan.end()
         return feed
       },
     })
@@ -100,11 +81,6 @@ const Query = objectType({
         ),
       },
       resolve: async (_parent, args, context, info) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'findMany',
-        })
         const drafts = await context.prisma.user
           .findUnique({
             where: {
@@ -117,7 +93,6 @@ const Query = objectType({
               published: false,
             },
           })
-        childSpan.end()
         return drafts
       },
     })
@@ -140,29 +115,16 @@ const Mutation = objectType({
         const postData = args.data.posts?.map((post) => {
           return { title: post.title, content: post.content || undefined }
         })
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'user',
-          'prisma.action': 'create',
-        })
-        try {
-          const user = await context.prisma.user.create({
-            data: {
-              name: args.data.name,
-              email: args.data.email,
-              posts: {
-                create: postData,
-              },
+        const user = await context.prisma.user.create({
+          data: {
+            name: args.data.name,
+            email: args.data.email,
+            posts: {
+              create: postData,
             },
-          })
-          return user
-        } catch (e) {
-          childSpan.setAttribute('error', true)
-          childSpan.setAttribute('prisma.error', e.toString())
-          throw e
-        } finally {
-          childSpan.end()
-        }
+          },
+        })
+        return user
       },
     })
 
@@ -177,11 +139,6 @@ const Mutation = objectType({
         authorEmail: nonNull(stringArg()),
       },
       resolve: async (_, args, context) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'create',
-        })
         const draft = await context.prisma.post.create({
           data: {
             title: args.data.title,
@@ -191,7 +148,6 @@ const Mutation = objectType({
             },
           },
         })
-        childSpan.end()
         return draft
       },
     })
@@ -202,11 +158,6 @@ const Mutation = objectType({
         id: nonNull(intArg()),
       },
       resolve: async (_, args, context) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'update',
-        })
         const post = await context.prisma.post.update({
           data: {
             likes: {
@@ -217,7 +168,6 @@ const Mutation = objectType({
             id: args.id,
           },
         })
-        childSpan.end()
         return post
       },
     })
@@ -229,16 +179,10 @@ const Mutation = objectType({
         published: nonNull(booleanArg()),
       },
       resolve: async (_, args, context) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'update',
-        })
         const post = await context.prisma.post.update({
           where: { id: args.id },
           data: { published: args.published },
         })
-        childSpan.end()
         return post
       },
     })
@@ -249,15 +193,9 @@ const Mutation = objectType({
         id: nonNull(intArg()),
       },
       resolve: async (_, args, context) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'post',
-          'prisma.action': 'delete',
-        })
         const post = await context.prisma.post.delete({
           where: { id: args.id },
         })
-        childSpan.end()
         return post
       },
     })
@@ -270,8 +208,39 @@ const UserType = objectType({
     t.field(User.id)
     t.field(User.name)
     t.field(User.email)
-    // Relation fields can use the generated resolver from nexus-prisma or a custom one
+
+    // The n+1 problem occurs when you loop through the results of a query and perform one additional query per result
+    // resulting in n number of queries plus the original (n+1).
+    // This can be a problem here when resolving a query that fetches multiple users and the users for each.
+
+    // User.posts is a resolver that fetches all the posts for a given user.
+    // You can use the generated resolver from nexus-prisma or define it yourself.
+
+    // 👇 The resolver for the `comments` field is automatically generated by nexus-prisma
     t.field(User.posts)
+
+    // 👇 Alternatively, it can be defined manually
+    // t.nonNull.list.nonNull.field('posts', {
+    //   type: 'Post',
+    //   resolve: (parent, args, ctx) => {
+    //     // Prisma's Dataloader will batch the queries to avoid the n+1 problem
+    //     // 👇 When findUnique is used in combination with the fluent API `.comments()`
+    //     return ctx.prisma.user
+    //       .findUnique({
+    //         where: {
+    //           id: parent.id,
+    //         },
+    //       })
+    //       .posts()
+
+    //     // 👇 This will lead to the n+1 problem because `findMany` are not batched
+    //     // return ctx.prisma.comment.findMany({
+    //     //   where: {
+    //     //     postId: parent.id,
+    //     //   },
+    //     // })
+    //   },
+    // })
   },
 })
 
