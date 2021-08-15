@@ -2,14 +2,6 @@
 ### Do not make changes to this file directly
 
 
-type Comment {
-  author: User!
-  comment: String!
-  createdAt: DateTime!
-  id: Int!
-  post: Post!
-}
-
 input CommentCreateInput {
   comment: String!
 }
@@ -20,7 +12,6 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type Mutation {
-  createComment(authorEmail: String!, data: CommentCreateInput!, postId: Int!): Comment
   createDraft(authorEmail: String!, data: PostCreateInput!): Post
   deletePost(id: Int!): Post
   likePost(id: Int!): Post
@@ -30,7 +21,6 @@ type Mutation {
 
 type Post {
   author: User
-  comments: [Comment!]!
   content: String
   createdAt: DateTime!
   id: Int!
@@ -54,16 +44,11 @@ type Query {
   draftsByUser(userUniqueInput: UserUniqueInput!): [Post]
   feed(orderBy: PostOrderByUpdatedAtInput, published: Boolean, searchString: String, skip: Int, take: Int): [Post!]!
   postById(id: Int!): Post
-  status: Status
 }
 
 enum SortOrder {
   asc
   desc
-}
-
-type Status {
-  up: Boolean
 }
 
 type User {

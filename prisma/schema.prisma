@@ -13,32 +13,20 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   name     String?
   posts    Post[]
-  comments Comment[]
 }
 
 model Post {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  title     String
-  content   String?
-  likes     Int       @default(0)
-  published Boolean   @default(false)
-  author    User?     @relation(fields: [authorId], references: [id])
-  authorId  Int?
-  comments  Comment[]
-}
-
-model Comment {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  comment   String
-  postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+  updatedAt DateTime @updatedAt
+  title     String
+  content   String?
+  likes     Int      @default(0)
+  published Boolean  @default(false)
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
 }

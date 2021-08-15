@@ -11,8 +11,7 @@ import {
   booleanArg,
 } from 'nexus'
 import { DateTimeResolver } from 'graphql-scalars'
-import { User, Post, Comment } from 'nexus-prisma'
-import { Prisma } from '@prisma/client'
+import { User, Post } from 'nexus-prisma'
 
 export const DateTime = asNexusMethod(DateTimeResolver, 'date')
 
@@ -30,18 +29,6 @@ const Query = objectType({
         const users = await context.prisma.user.findMany()
         childSpan.end()
         return users
-      },
-    })
-
-    t.field('status', {
-      type: objectType({
-        name: 'Status',
-        definition(t) {
-          t.boolean('up')
-        },
-      }),
-      resolve: (_parent, _args, context) => {
-        return { up: true }
       },
     })
 
@@ -209,39 +196,6 @@ const Mutation = objectType({
       },
     })
 
-    t.field('createComment', {
-      type: 'Comment',
-      args: {
-        data: nonNull(
-          arg({
-            type: 'CommentCreateInput',
-          }),
-        ),
-        authorEmail: nonNull(stringArg()),
-        postId: nonNull(intArg()),
-      },
-      resolve: async (_, args, context) => {
-        const { tracer } = context.request.openTelemetry()
-        const childSpan = tracer.startSpan(`prisma`).setAttributes({
-          'prisma.model': 'comment',
-          'prisma.action': 'create',
-        })
-        const comment = await context.prisma.comment.create({
-          data: {
-            comment: args.data.comment,
-            post: {
-              connect: { id: args.postId },
-            },
-            author: {
-              connect: { email: args.authorEmail },
-            },
-          },
-        })
-        childSpan.end()
-        return comment
-      },
-    })
-
     t.field('likePost', {
       type: 'Post',
       args: {
@@ -333,19 +287,6 @@ const PostType = objectType({
     t.field(Post.likes)
     // Relation fields and generated resolvers from nexus-prisma
     t.field(Post.author)
-    t.field(Post.comments)
-  },
-})
-
-const CommentType = objectType({
-  name: 'Comment',
-  definition(t) {
-    t.field(Comment.id)
-    t.field(Comment.createdAt)
-    t.field(Comment.comment)
-    // Relation fields and generated resolvers from nexus-prisma
-    t.field(Comment.post)
-    t.field(Comment.author)
   },
 })
 
@@ -399,7 +340,6 @@ export const schema = makeSchema({
     Mutation,
     PostType,
     UserType,
-    CommentType,
     UserUniqueInput,
     UserCreateInput,
     PostCreateInput,
