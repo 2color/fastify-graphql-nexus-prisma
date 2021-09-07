@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["nApi"]
+  previewFeatures = ["nApi", "referentialActions"]
 }
 
 generator nexusPrisma {
@@ -8,7 +8,7 @@ generator nexusPrisma {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
@@ -39,6 +39,6 @@ model Comment {
   comment   String
   postId    Int
   post      Post     @relation(fields: [postId], references: [id])
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id], onUpdate: NoAction, onDelete: NoAction)
   authorId  Int
 }
