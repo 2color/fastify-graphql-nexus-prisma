@@ -11,8 +11,7 @@ import {
   booleanArg,
 } from 'nexus'
 import { DateTimeResolver } from 'graphql-scalars'
-import { User, Post, Comment } from 'nexus-prisma'
-import { Prisma } from '@prisma/client'
+import { User, Post, Comment, Woot } from 'nexus-prisma'
 
 export const DateTime = asNexusMethod(DateTimeResolver, 'date')
 
@@ -310,6 +309,13 @@ const Mutation = objectType({
   },
 })
 
+const WootType = objectType({
+  name: Woot.$name,
+  definition(t) {
+    t.field(Woot.id)
+  },
+})
+
 const UserType = objectType({
   name: User.$name,
   definition(t) {
@@ -427,6 +433,7 @@ export const schema = makeSchema({
     Query,
     Mutation,
     PostType,
+    WootType,
     UserType,
     CommentType,
     UserUniqueInput,

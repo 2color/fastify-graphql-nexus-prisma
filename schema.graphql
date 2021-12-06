@@ -83,3 +83,7 @@ input UserUniqueInput {
   email: String
   id: Int
 }
+
+type Woot {
+  id: ID!
+}
