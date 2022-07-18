@@ -1,5 +1,17 @@
 # GraphQL Server with Fastify, Mercurius, Prisma, and Nexus Example
 
+## ⚠️ Warning! 
+
+This repository is **no longer maintained** and some of the packages may be out of date.
+
+Nonetheless, there are two patterns in here that I think are still really useful for anyone building a GraphQL API:
+- Code-first GraphQL schema construction. I still think this is the way to go if you like type safety and TypeScript. I would probably switch Nexus and nexus-prisma for [**Pothos**](https://pothos-graphql.dev/). You can learn about this Pothos in [this talk from the Pothos creator](https://www.youtube.com/watch?v=LqKPfMmxFxw). The main benefit I see of Pothos over Nexus is simplicity and more active development.
+- Observability & Tracing: having visibility into the health of your GraphQL API is essential, as I demo in [this talk](https://www.youtube.com/watch?v=H9P2rrQJEts). 
+
+
+## Intro
+
+
 This repo shows how to build a GraphQL server with TypeScript and the following technologies:
 
 - [**Fastify**](https://www.fastify.io/): Fast and low overhead web framework, for Node.js
@@ -10,7 +22,7 @@ This repo shows how to build a GraphQL server with TypeScript and the following 
 - [**PostgreSQL**](https://www.postgresql.org/): powerful, open source object-relational database system with over 30 years of active development.
 <!-- - [**Sentry**](https://sentry.io/): an error tracking and monitoring tool. -->
 - [**OpenTelemetry Tracing**](https://opentelemetry.io/): An observability framework for cloud-native software. Configured to trace HTTP requests, GraphQL resolution and Prisma queries.
-- [**Altair GraphQL**](https://altair.sirmuel.design/): GraphQL Web Client (similar to GraphQL Playground)
+- [**Altair GraphQL**](https://altair.sirmuel.design/): GraphQL Web Client (similar to GraphQL Playground and Gr)
 
 The project is written in TypeScript and attempts to maintain a high degree of type-safety by leveraging Prisma and GraphQL.
 
